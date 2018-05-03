@@ -84,7 +84,7 @@ class List extends View {
       }
       var lastel = this.element;
       for (var key in list) {
-        var listel = this.listel(this.app, document.createElement('div'),
+        var listel = new this.listel(this.app, document.createElement('div'),
             list[key]);
         listel.element.onload = function() {
           lastel.element.scrollIntoView();

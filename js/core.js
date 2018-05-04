@@ -302,6 +302,7 @@ if (!String.prototype.format) {
     });
   };
 }
+
 class Dict extends Resource {
   constructor(sync, name, typename, subClass, meta, value) {
     super(sync, name, typename, meta, value);
@@ -333,11 +334,19 @@ class Dict extends Resource {
   }
   queryPrimary() {
     return super.queryPrimary()
-    .then(this.loadSubs.bind(this));
+    .then(this.loadSubs.bind(this))
+    .then(function() {
+      this.runcallbacks(this.subvalue);
+      return this.subvalue;
+    }.bind(this));
   }
   query() {
     return super.query()
-    .then(this.loadSubs.bind(this));
+    .then(this.loadSubs.bind(this))
+    .then(function() {
+      this.runcallbacks(this.subvalue);
+      return this.subvalue;
+    }.bind(this));
   }
   loadSubs() {
     return this.loadSubvalue().then(function() {
@@ -373,7 +382,7 @@ class Dict extends Resource {
     }
     if (this.value.includes(key)) {
       resource = this.createSubvalue(key);
-      return resource.query().then(function(resource) {
+      return resource.query().then(function() {
         this.subvalue[resource.name] = resource;
         return resource;
       }.bind(this));

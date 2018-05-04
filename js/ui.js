@@ -44,9 +44,10 @@ class Notify {
 }
 
 class View {
-  constructor(app, element) {
+  constructor(app, element, resource) {
     this.app = app;
     this.element = element;
+    this.resource = resource;
     if (typeof this.element !== 'undefined') {
       this.element.onkeyup = this.onkeyup.bind(this);
     }
@@ -86,6 +87,8 @@ class List extends View {
       for (var key in list) {
         var listel = new this.listel(this.app, document.createElement('div'),
             list[key]);
+        list[key].oneshot(this.reload.bind(this));
+        listel.reload();
         listel.element.onload = function() {
           lastel.element.scrollIntoView();
         }
@@ -183,7 +186,10 @@ class Listel extends View {
       desc.innerText = this.resource.value;
     }
     div.onclick = function(event) {
-      this.app.popup(this.modal(this.app, resource));
+      var modal = new this.modal(this.app,
+          document.createElement('div'), this.resource);
+      modal.reload();
+      this.app.popup(modal.element);
     }.bind(this);
   }
 }

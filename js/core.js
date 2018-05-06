@@ -372,6 +372,9 @@ class Dict extends Resource {
       return Promise.resolve(this);
     }
     console.log('Removing Subvalue', this.name, key);
+    if (typeof this.subvalue[key] !== 'undefined') {
+      delete this.subvalue[key];
+    }
     var value = JSON.parse(JSON.stringify(this.value));
     value.splice(index, 1);
     return this.update(value);

@@ -177,8 +177,11 @@ class Listel extends View {
       for (var prop in this.resource.value) {
         var desc = document.createElement('p');
         div.appendChild(desc);
-        desc.innerText = this.resource.label[prop].format(
-            this.resource.value[prop]);
+        if (typeof this.resource.value[prop] !== 'undefined' &&
+            typeof this.resource.label[prop] !== 'undefined') {
+          desc.innerText = this.resource.label[prop].format(
+              this.resource.value[prop]);
+        }
       }
     } else {
       var desc = document.createElement('p');

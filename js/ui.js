@@ -108,6 +108,29 @@ class List extends View {
   }
 }
 
+class Checkbox extends View {
+  constructor(labelText, className, checked, unchecked) {
+    super(undefined, document.createElement('div'), undefined);
+    this.inputId = String(Math.random());
+    this.input = document.createElement('input');
+    this.label = document.createElement('label');
+    this.input.setAttribute('id', this.inputId);
+    this.label.setAttribute('for', this.inputId);
+    this.label.innerText = labelText;
+    this.element.appendChild(this.input);
+    this.element.appendChild(this.label);
+    this.element.className = className;
+    this.input.setAttribute('type', 'checkbox');
+    this.input.onchange = function(event) {
+      if (this.input.checked && typeof checked === 'function') {
+        checked();
+      } else if (typeof unchecked === 'function') {
+        unchecked();
+      }
+    }.bind(this);
+  }
+}
+
 class Input extends View {
   constructor(resource, propName, labelText, className, typeName) {
     super(resource.app, undefined);

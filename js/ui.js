@@ -217,6 +217,7 @@ class Listel extends View {
       modal.reload();
       this.app.popup(modal.element);
     }.bind(this);
+    return div;
   }
 }
 

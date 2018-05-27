@@ -54,10 +54,10 @@ class View {
   }
   onkeyup() {}
   reload() {
-    var div = document.createElement('div');
+    this.div = document.createElement('div');
     this.element.innerHTML = '';
-    this.element.appendChild(div);
-    return div;
+    this.element.appendChild(this.div);
+    return this.div;
   }
 }
 
@@ -211,12 +211,14 @@ class Listel extends View {
       div.appendChild(desc);
       desc.innerText = this.resource.value;
     }
-    div.onclick = function(event) {
-      var modal = new this.modal(this.app,
-          document.createElement('div'), this.resource);
-      modal.reload();
-      this.app.popup(modal.element);
-    }.bind(this);
+    if (typeof this.modal !== 'undefined') {
+      div.onclick = function(event) {
+        var modal = new this.modal(this.app,
+            document.createElement('div'), this.resource);
+        modal.reload();
+        this.app.popup(modal.element);
+      }.bind(this);
+    }
     return div;
   }
 }

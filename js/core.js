@@ -287,9 +287,9 @@ if (!String.prototype.format) {
     const formatValue = function(value) {
       if (typeof value === 'boolean') {
         if (value === true) {
-          return 'YUP';
+          return 'yes';
         } else {
-          return 'NOPE';
+          return 'no';
         }
       }
       return value;

@@ -182,10 +182,28 @@ class Button {
   }
 }
 
+const appendResourceValue = function(resource, div) {
+  if (typeof resource.value === 'object' &&
+      typeof resource.label === 'object') {
+    for (var prop in resource.value) {
+      var desc = document.createElement('p');
+      div.appendChild(desc);
+      if (typeof resource.value[prop] !== 'undefined' &&
+          typeof resource.label[prop] !== 'undefined') {
+        desc.innerText = resource.label[prop].format(
+            resource.value[prop]);
+      }
+    }
+  } else {
+    var desc = document.createElement('p');
+    div.appendChild(desc);
+    desc.innerText = resource.value;
+  }
+}
+
 class Listel extends View {
   constructor(app, element, resource, modal) {
-    super(app, element);
-    this.resource = resource;
+    super(app, element, resource);
     this.modal = modal;
   }
   reload() {
@@ -195,22 +213,7 @@ class Listel extends View {
     var title = document.createElement('h2');
     div.appendChild(title);
     title.innerText = this.resource.name;
-    if (typeof this.resource.value === 'object' &&
-        typeof this.resource.label === 'object') {
-      for (var prop in this.resource.value) {
-        var desc = document.createElement('p');
-        div.appendChild(desc);
-        if (typeof this.resource.value[prop] !== 'undefined' &&
-            typeof this.resource.label[prop] !== 'undefined') {
-          desc.innerText = this.resource.label[prop].format(
-              this.resource.value[prop]);
-        }
-      }
-    } else {
-      var desc = document.createElement('p');
-      div.appendChild(desc);
-      desc.innerText = this.resource.value;
-    }
+    appendResourceValue(this.resource, div);
     if (typeof this.modal !== 'undefined') {
       div.onclick = function(event) {
         var modal = new this.modal(this.app,

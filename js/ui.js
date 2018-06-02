@@ -230,6 +230,7 @@ class Listel extends View {
 
 class App {
   constructor(element) {
+    this.popedup = null;
     this.element = element;
     this.jsonp = new JSONProcessor();
     this.processors = {
@@ -259,10 +260,22 @@ class App {
     if (typeof isstatic === 'undefined') {
       isstatic = false;
     }
-    mui.overlay('on', {static: isstatic}, modal);
+
+    modal.setAttribute('id', 'mui-overlay');
+    modal.setAttribute('tabindex', '-1');
+    modal.onclick = function(event) {
+      if (event.target.id === 'mui-overlay' && isstatic === false) {
+        this.popdown();
+      }
+    }.bind(this);
+    this.popedup = modal;
+    document.body.appendChild(this.popedup);
   }
   popdown() {
-    mui.overlay('off');
+    if (this.popedup === null) {
+      return;
+    }
+    document.body.removeChild(this.popedup);
   }
   mainview(view) {
     for (var child = 0; child < this.element.children.length; ++child) {

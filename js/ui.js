@@ -73,6 +73,7 @@ class List extends View {
     this.resource.register(this.reload.bind(this));
     this.resource.onempty(this.reload.bind(this));
     this.listel = listel;
+    this.subs = {};
   }
   reload() {
     return this.list()
@@ -85,8 +86,12 @@ class List extends View {
       }
       var lastel = this.element;
       for (var key in list) {
-        var listel = new this.listel(this.app, document.createElement('div'),
-            list[key]);
+        if (typeof this.subs[key] === 'undefined') {
+          this.subs[key] = new this.listel(this.app,
+              document.createElement('div'),
+              list[key]);
+        }
+        var listel = this.subs[key];
         list[key].oneshot(this.reload.bind(this));
         listel.reload();
         listel.element.onload = function() {

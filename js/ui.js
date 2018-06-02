@@ -158,7 +158,9 @@ class Input extends View {
       } else {
         value[propName] = event.target.value;
       }
-      this.resource.update(value);
+      setTimeout(function() {
+        this.resource.update(value);
+      }.bind(this), 0);
     }.bind(this);
     if (typeof typeName !== 'undefined' && typeName === 'checkbox') {
       this.input.checked = this.resource.value[propName];

@@ -211,6 +211,25 @@ class Button {
   }
 }
 
+const appendResourceValue = function(resource, div) {
+  if (typeof resource.value === 'object' &&
+      typeof resource.label === 'object') {
+    for (var prop in resource.value) {
+      var desc = document.createElement('p');
+      div.appendChild(desc);
+      if (typeof resource.value[prop] !== 'undefined' &&
+          typeof resource.label[prop] !== 'undefined') {
+        desc.innerText = resource.label[prop].format(
+            resource.value[prop]);
+      }
+    }
+  } else {
+    var desc = document.createElement('p');
+    div.appendChild(desc);
+    desc.innerText = resource.value;
+  }
+}
+
 class Listel extends View {
   constructor(app, element, resource, modal) {
     super(app, element, resource);

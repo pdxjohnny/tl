@@ -7,6 +7,10 @@
     "webpack": "./node_modules/.bin/webpack --config webpack.config.js",
     "rebuild": "cd src && ../node_modules/.bin/nodemon -e js --exec 'cd ..; npm run webpack; test 1'"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pdxjohnny/tl.git"
+  },
   "keywords": [],
   "author": "pdxjohnny",
   "license": "MIT",

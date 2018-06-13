@@ -287,9 +287,9 @@ if (!String.prototype.format) {
     const formatValue = function(value) {
       if (typeof value === 'boolean') {
         if (value === true) {
-          return 'YUP';
+          return 'yes';
         } else {
-          return 'NOPE';
+          return 'no';
         }
       }
       return value;
@@ -302,6 +302,7 @@ if (!String.prototype.format) {
     });
   };
 }
+
 class Dict extends Resource {
   constructor(sync, name, typename, subClass, meta, value) {
     super(sync, name, typename, meta, value);
@@ -331,12 +332,26 @@ class Dict extends Resource {
       }.bind(this));
     }.bind(this));
   }
-  load() {
-    return super.load().then(function() {
-      return this.loadSubvalue().then(function() {
-        console.log('Subvalues Loaded', this.name, this.value, this.subvalue);
-        return this;
-      }.bind(this));
+  queryPrimary() {
+    return super.queryPrimary()
+    .then(this.loadSubs.bind(this))
+    .then(function() {
+      this.runcallbacks(this.subvalue);
+      return this.subvalue;
+    }.bind(this));
+  }
+  query() {
+    return super.query()
+    .then(this.loadSubs.bind(this))
+    .then(function() {
+      this.runcallbacks(this.subvalue);
+      return this.subvalue;
+    }.bind(this));
+  }
+  loadSubs() {
+    return this.loadSubvalue().then(function() {
+      console.log('Subvalues Loaded', this.name, this.value, this.subvalue);
+      return this;
     }.bind(this));
   }
   contains(key) {
@@ -357,6 +372,9 @@ class Dict extends Resource {
       return Promise.resolve(this);
     }
     console.log('Removing Subvalue', this.name, key);
+    if (typeof this.subvalue[key] !== 'undefined') {
+      delete this.subvalue[key];
+    }
     var value = JSON.parse(JSON.stringify(this.value));
     value.splice(index, 1);
     return this.update(value);
@@ -367,7 +385,7 @@ class Dict extends Resource {
     }
     if (this.value.includes(key)) {
       resource = this.createSubvalue(key);
-      return resource.load().then(function(resource) {
+      return resource.query().then(function() {
         this.subvalue[resource.name] = resource;
         return resource;
       }.bind(this));
@@ -404,3 +422,12 @@ class LocalStorageSync extends Sync {
     }.bind(this));
   }
 }
+
+export {
+  Resource,
+  Sync,
+  Bound,
+  Dict,
+  JSONProcessor,
+  LocalStorageSync
+};

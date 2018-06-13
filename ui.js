@@ -1,3 +1,7 @@
+import { JSONProcessor, LocalStorageSync } from './core.js';
+import css_muicss from './node_modules/muicss/dist/css/mui.min.css';
+import css_loading from './css/loading.css';
+
 class Notify {
   constructor(app, element, timeout) {
     if (typeof timeout === 'undefined') {
@@ -44,19 +48,38 @@ class Notify {
 }
 
 class View {
-  constructor(app, element) {
+  constructor(app, element, resource) {
     this.app = app;
     this.element = element;
+    this.resource = resource;
     if (typeof this.element !== 'undefined') {
       this.element.onkeyup = this.onkeyup.bind(this);
     }
   }
   onkeyup() {}
   reload() {
-    var div = document.createElement('div');
+    this.div = document.createElement('div');
     this.element.innerHTML = '';
-    this.element.appendChild(div);
-    return div;
+    this.element.appendChild(this.div);
+    return this.div;
+  }
+  appendResourceValue(resource, div) {
+    if (typeof resource.value === 'object' &&
+        typeof resource.label === 'object') {
+      for (var prop in resource.value) {
+        var desc = document.createElement('p');
+        div.appendChild(desc);
+        if (typeof resource.value[prop] !== 'undefined' &&
+            typeof resource.label[prop] !== 'undefined') {
+          desc.innerText = resource.label[prop].format(
+              resource.value[prop]);
+        }
+      }
+    } else {
+      var desc = document.createElement('p');
+      div.appendChild(desc);
+      desc.innerText = resource.value;
+    }
   }
 }
 
@@ -72,6 +95,7 @@ class List extends View {
     this.resource.register(this.reload.bind(this));
     this.resource.onempty(this.reload.bind(this));
     this.listel = listel;
+    this.subs = {};
   }
   reload() {
     return this.list()
@@ -84,8 +108,14 @@ class List extends View {
       }
       var lastel = this.element;
       for (var key in list) {
-        var listel = this.listel(this.app, document.createELement('div'),
-            list[key]);
+        if (typeof this.subs[key] === 'undefined') {
+          this.subs[key] = new this.listel(this.app,
+              document.createElement('div'),
+              list[key]);
+        }
+        var listel = this.subs[key];
+        list[key].oneshot(this.reload.bind(this));
+        listel.reload();
         listel.element.onload = function() {
           lastel.element.scrollIntoView();
         }
@@ -102,6 +132,29 @@ class List extends View {
     noItems.style.textAlign = 'center';
     noItems.innerText = this.empty;
     return noItems;
+  }
+}
+
+class Checkbox extends View {
+  constructor(labelText, className, checked, unchecked) {
+    super(undefined, document.createElement('div'), undefined);
+    this.inputId = String(Math.random());
+    this.input = document.createElement('input');
+    this.label = document.createElement('label');
+    this.input.setAttribute('id', this.inputId);
+    this.label.setAttribute('for', this.inputId);
+    this.label.innerText = labelText;
+    this.element.appendChild(this.input);
+    this.element.appendChild(this.label);
+    this.element.className = className;
+    this.input.setAttribute('type', 'checkbox');
+    this.input.onchange = function(event) {
+      if (this.input.checked && typeof checked === 'function') {
+        checked();
+      } else if (typeof unchecked === 'function') {
+        unchecked();
+      }
+    }.bind(this);
   }
 }
 
@@ -132,7 +185,9 @@ class Input extends View {
       } else {
         value[propName] = event.target.value;
       }
-      this.resource.update(value);
+      setTimeout(function() {
+        this.resource.update(value);
+      }.bind(this), 0);
     }.bind(this);
     if (typeof typeName !== 'undefined' && typeName === 'checkbox') {
       this.input.checked = this.resource.value[propName];
@@ -158,8 +213,7 @@ class Button {
 
 class Listel extends View {
   constructor(app, element, resource, modal) {
-    super(app, element);
-    this.resource = resource;
+    super(app, element, resource);
     this.modal = modal;
   }
   reload() {
@@ -169,27 +223,23 @@ class Listel extends View {
     var title = document.createElement('h2');
     div.appendChild(title);
     title.innerText = this.resource.name;
-    if (typeof this.resource.value === 'object' &&
-        typeof this.resource.label === 'object') {
-      for (var prop in this.resource.value) {
-        var desc = document.createElement('p');
-        div.appendChild(desc);
-        desc.innerText = this.resource.label[prop].format(
-            this.resource.value[prop]);
-      }
-    } else {
-      var desc = document.createElement('p');
-      div.appendChild(desc);
-      desc.innerText = this.resource.value;
+    this.appendResourceValue(this.resource, div);
+    if (typeof this.modal !== 'undefined') {
+      div.onclick = function(event) {
+        var modal = new this.modal(this.app,
+            document.createElement('div'), this.resource);
+        modal.reload();
+        this.app.popup(modal.element);
+      }.bind(this);
     }
-    div.onclick = function(event) {
-      this.app.popup(this.modal(this.app, resource));
-    }.bind(this);
+    return div;
   }
 }
 
 class App {
   constructor(element) {
+    this.popupstatic = false;
+    this.popedup = null;
     this.element = element;
     this.jsonp = new JSONProcessor();
     this.processors = {
@@ -219,10 +269,28 @@ class App {
     if (typeof isstatic === 'undefined') {
       isstatic = false;
     }
-    mui.overlay('on', {static: isstatic}, modal);
+    this.popupstatic = isstatic;
+
+    modal.setAttribute('id', 'mui-overlay');
+    modal.setAttribute('tabindex', '-1');
+    modal.onclick = function(event) {
+      if (event.target.id === 'mui-overlay' &&
+          this.popupstatic === false) {
+        this.popdown();
+      }
+    }.bind(this);
+    this.popedup = modal;
+    document.body.appendChild(this.popedup);
   }
   popdown() {
-    mui.overlay('off');
+    if (this.popedup === null) {
+      return;
+    }
+    document.body.removeChild(this.popedup);
+    if (typeof this.popedup.dismissed === 'function') {
+      this.popedup.dismissed();
+    }
+    this.popedup = null;
   }
   mainview(view) {
     for (var child = 0; child < this.element.children.length; ++child) {
@@ -272,3 +340,15 @@ class Loading extends View {
     return div;
   }
 }
+
+export {
+  Notify,
+  View,
+  List,
+  Checkbox,
+  Input,
+  Button,
+  Listel,
+  App,
+  Loading
+};

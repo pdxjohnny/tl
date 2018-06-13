@@ -1,0 +1,23 @@
+{
+  "name": "tinylib",
+  "version": "1.0.0",
+  "description": "tinylib",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "./node_modules/.bin/webpack --config webpack.config.js",
+    "rebuild": "cd src && ../node_modules/.bin/nodemon -e js --exec 'cd ..; npm run webpack; test 1'"
+  },
+  "keywords": [],
+  "author": "pdxjohnny",
+  "license": "MIT",
+  "devDependencies": {
+    "css-loader": "^0.28.11",
+    "nodemon": "^1.17.5",
+    "style-loader": "^0.21.0",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^3.0.1"
+  },
+  "dependencies": {
+    "muicss": "^0.9.39"
+  }
+}

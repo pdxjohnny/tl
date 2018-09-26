@@ -115,7 +115,10 @@ class ConnectionBasedSync extends Sync {
         console.warn(resource.name, resource.value, resource.owners, err)
       });
     } else {
-      this.send(resource, 'get', resource.name);
+      return resource.pack(null)
+      .then(function(packed) {
+        this.send(resource, 'get', resource.name, packed);
+      }.bind(this));
     }
     return Promise.resolve(null);
   }
@@ -151,7 +154,7 @@ class ConnectionBasedSync extends Sync {
       if (typeof resource === 'undefined') {
         throw new Error('msg resource is undefined');
       }
-      this.runthrough(this.post, 'pre', resource, msg)
+      this.runthrough(this.pre, 'pre', resource, msg)
       .then(function(preprocessed) {
         this.deliver(resource, msg, preprocessed);
       }.bind(this));

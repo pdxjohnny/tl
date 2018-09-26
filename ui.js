@@ -1,5 +1,5 @@
 import { JSONProcessor, LocalStorageSync } from './core.js';
-import css_muicss from 'muicss/dist/css/mui.min.css';
+// import css_muicss from 'muicss/dist/css/mui.min.css';
 import css_loading from './css/loading.css';
 
 class Notify {

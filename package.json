@@ -1,6 +1,6 @@
 {
   "name": "tinylib",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "tinylib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -21,7 +21,5 @@
     "webpack": "^4.10.2",
     "webpack-cli": "^3.0.1"
   },
-  "dependencies": {
-    "muicss": "^0.9.39"
-  }
+  "dependencies": {}
 }

@@ -52,17 +52,16 @@ class View {
     this.app = app;
     this.element = element;
     this.resource = resource;
-    if (typeof this.element !== 'undefined') {
-      this.element.onkeyup = this.onkeyup.bind(this);
-    }
+    this.inst();
   }
   onkeyup() {}
-  reload() {
-    this.div = document.createElement('div');
-    this.element.innerHTML = '';
-    this.element.appendChild(this.div);
-    return this.div;
+  inst() {
+    if (typeof this.element == 'undefined') {
+      this.element = document.createElement('div');
+    }
+    return this.element;
   }
+  reload() {}
   appendResourceValue(resource, div) {
     if (typeof resource.value === 'object' &&
         typeof resource.label === 'object') {

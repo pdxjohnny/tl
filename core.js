@@ -112,14 +112,20 @@ class Resource {
     return this._update(this.sync, value);
   }
   _update(syncs, value) {
-    return Promise.race(syncs.map(function(sync) {
-      return sync.set(this, value);
-    }.bind(this)))
+    return this._update_syncs(syncs, value)
     .then(function() {
       this.value = value;
       this.runcallbacks(value);
       return this;
     }.bind(this));
+  }
+  _update_syncs(syncs, value) {
+    if (syncs.length === 0) {
+      return Promise.resolve();
+    }
+    return Promise.race(syncs.map(function(sync) {
+      return sync.set(this, value);
+    }.bind(this)))
   }
   onupdate(value) {
     return this.validateupdate(value)

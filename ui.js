@@ -52,9 +52,11 @@ class View {
     this.app = app;
     this.element = element;
     this.resource = resource;
+    if (typeof this.resource !== 'undefined') {
+      this.resource.register(this.reload.bind(this));
+    }
     this.inst();
   }
-  onkeyup() {}
   inst() {
     if (typeof this.element == 'undefined') {
       this.element = document.createElement('div');

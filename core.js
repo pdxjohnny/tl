@@ -76,6 +76,14 @@ class Resource {
       once: true
     });
   }
+  changed() {
+    return new Promise(function(resolve, reject) {
+      this.oneshot(function(value) {
+        resolve(value);
+      }.bind(this));
+      this.query();
+    }.bind(this));
+  }
   unregister(callback) {
     if (typeof callback !== 'function') {
       throw new Error('callback must be function');
@@ -145,10 +153,10 @@ class Resource {
           (typeof this.callbacks[i].empty !== 'undefined' &&
           this.callbacks[i].empty === true)) {
         this.callbacks[i].callback(value, this);
-      }
-      if (typeof this.callbacks[i].once !== 'undefined' &&
-          this.callbacks[i].once) {
-        remove.push(i);
+        if (typeof this.callbacks[i].once !== 'undefined' &&
+            this.callbacks[i].once) {
+          remove.push(i);
+        }
       }
     }
     for (var i = 0; i < remove.length; ++i) {

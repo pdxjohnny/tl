@@ -70,11 +70,6 @@ class ConnectionBasedSync extends Sync {
       }
       return this.preprocess(resource, value)
       .then(function(preprocessed) {
-        if (typeof msg.hash === 'string' &&
-            msg.hash === btoa(openpgp.crypto.hash.sha512(preprocessed))) {
-          console.warn('got prevented')
-          return;
-        }
         this.send(resource, 'got', resource.name, {
           data: preprocessed
         });
@@ -103,24 +98,10 @@ class ConnectionBasedSync extends Sync {
     }
     this.watch[resource.name] = resource;
     var msg = {};
-    if (typeof resource.value !== undefined &&
-        resource.value !== null &&
-        resource.value !== undefined) {
-      this.preprocess(resource, resource.value)
-      .then(function(preprocessed) {
-        this.send(resource, 'get', resource.name, {
-          hash: btoa(openpgp.crypto.hash.sha512(preprocessed))
-        });
-      }.bind(this)).catch(function(err) {
-        console.warn(resource.name, resource.value, resource.owners, err)
-      });
-    } else {
-      return resource.pack(null)
-      .then(function(packed) {
-        this.send(resource, 'get', resource.name, packed);
-      }.bind(this));
-    }
-    return Promise.resolve(null);
+    return resource.pack(null)
+    .then(function(packed) {
+      this.send(resource, 'get', resource.name, packed);
+    }.bind(this));
   }
   set(resource, value) {
     this.watch[resource.name] = resource;

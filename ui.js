@@ -258,6 +258,7 @@ class Listel extends View {
 
 class App {
   constructor(element) {
+    this.currview = null;
     this.popupstatic = false;
     this.popedup = null;
     this.element = element;
@@ -269,6 +270,10 @@ class App {
     this.localstorage = new LocalStorageSync([], 'localstorage',
         this.processors.pre, this.processors.post);
     this.sync = [this.localstorage];
+    this.page = {
+      hash: this.location_hash(),
+    };
+    window.addEventListener('hashchange', this.navigation.bind(this));
   }
   popup(element, isstatic) {
     var modal = document.createElement('div');
@@ -319,8 +324,42 @@ class App {
     this.element.innerText = '';
     this.element.appendChild(view.element);
     console.log('Main View is now', view);
+    this.currview = view;
     for (var child = 0; child < this.element.children.length; ++child) {
       this.element.children[child].style.display = 'block';
+    }
+    if (typeof view.resource !== 'undefined') {
+      view.resource.query();
+    }
+  }
+  location_hash() {
+    var obj = new Object();
+    location.hash.replace('#', '').split('&').map(function(pair) {
+      pair = pair.split('=', 2);
+      if (pair[0].length) {
+        obj[pair[0]] = pair[1];
+      }
+    }.bind(this));
+    return obj;
+  }
+  navigation() {
+    this.page.hash = this.location_hash();
+    for (var i in this.views) {
+      var view = this.views[i];
+      if (this.page.hash.hasOwnProperty(view.name) &&
+          (this.currview === null ||
+          this.currview.name !== view.name)) {
+        if (this.page.hash[view.name] !== undefined &&
+            typeof view.resource !== 'undefined') {
+          view.resource.name = this.page.hash[view.name];
+        }
+        this.mainview(view);
+        break;
+      }
+    }
+    if (this.currview === null) {
+      this.mainview(this.defaultview);
+      return;
     }
   }
 }

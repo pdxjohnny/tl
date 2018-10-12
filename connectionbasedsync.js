@@ -93,9 +93,6 @@ class ConnectionBasedSync extends Sync {
     this.resource_updated(resource, msg);
   }
   get(resource) {
-    if (typeof this.watch[resource.name] !== 'undefined') {
-      return Promise.resolve(null);
-    }
     this.watch[resource.name] = resource;
     var msg = {};
     return resource.pack(null)

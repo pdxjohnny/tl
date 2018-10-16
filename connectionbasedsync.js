@@ -25,7 +25,7 @@ class ConnectionBasedSync extends Sync {
   opened() {
     this.connected = true;
     if (this.reconnect_timeout !== undefined) {
-      cancelTimeout(this.reconnect_timeout);
+      clearTimeout(this.reconnect_timeout);
     }
     this.process();
   }
@@ -102,11 +102,9 @@ class ConnectionBasedSync extends Sync {
   }
   set(resource, value) {
     this.watch[resource.name] = resource;
-    return this.preprocess(resource, value)
-    .then(function(preprocessed) {
-      this.send(resource, 'set', resource.name, {
-        data: preprocessed,
-      });
+    return resource.pack(value)
+    .then(function(packed) {
+      this.send(resource, 'set', resource.name, packed);
       return resource;
     }.bind(this));
   }

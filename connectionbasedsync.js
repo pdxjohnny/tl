@@ -1,4 +1,4 @@
-import { Resource, Sync } from './core.js';
+import { Resource, Sync } from 'tinylib/core';
 
 class ConnectionBasedSync extends Sync {
   constructor(sync, name, pre, post, relay, meta, value) {
@@ -48,6 +48,7 @@ class ConnectionBasedSync extends Sync {
       }
       console.log('Processing', msg);
       resource.name = msg.name;
+      resource.meta.__type = msg.type;
       this.resource_event(resource, msg.method, msg);
     }.bind(this));
   }
@@ -81,10 +82,11 @@ class ConnectionBasedSync extends Sync {
   }
   resource_updated(resource, msg) {
     if (typeof msg.data === 'undefined' ||
-        !this.watch.hasOwnProperty(resource.name)) {
+        !(this.watch.hasOwnProperty(resource.meta.__type) &&
+        this.watch[resource.meta.__type].hasOwnProperty(resource.name))) {
       return;
     }
-    this.watch[resource.name].onupdate(msg.data);
+    this.watch[resource.meta.__type][resource.name].onupdate(msg.data);
   }
   resource_event_got(resource, msg) {
     this.resource_updated(resource, msg);
@@ -93,7 +95,10 @@ class ConnectionBasedSync extends Sync {
     this.resource_updated(resource, msg);
   }
   get(resource) {
-    this.watch[resource.name] = resource;
+    if (!this.watch.hasOwnProperty(resource.meta.__type)) {
+      this.watch[resource.meta.__type] = {};
+    }
+    this.watch[resource.meta.__type][resource.name] = resource;
     var msg = {};
     return resource.pack(null)
     .then(function(packed) {
@@ -101,7 +106,10 @@ class ConnectionBasedSync extends Sync {
     }.bind(this));
   }
   set(resource, value) {
-    this.watch[resource.name] = resource;
+    if (!this.watch.hasOwnProperty(resource.meta.__type)) {
+      this.watch[resource.meta.__type] = {};
+    }
+    this.watch[resource.meta.__type][resource.name] = resource;
     return resource.pack(value)
     .then(function(packed) {
       this.send(resource, 'set', resource.name, packed);

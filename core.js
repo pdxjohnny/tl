@@ -211,6 +211,7 @@ class Sync extends Resource {
     this.post = post;
     this.relay = relay;
     this.watching = {};
+    this.logging = false;
   }
   preprocess(resource, value) {
     return resource.marshal(value)

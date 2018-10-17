@@ -16,7 +16,9 @@ class WSSync extends ConnectionBasedSync  {
     console.warn('WSSync websocket error', err);
   }
   onmessage(event) {
-    console.log('WSSync got message', event.data);
+    if (this.logging) {
+      console.log('WSSync got message', event.data);
+    }
     this.delivery(event.data);
   }
   deliver(resource, msg, preprocessed) {

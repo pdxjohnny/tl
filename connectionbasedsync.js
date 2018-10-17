@@ -43,10 +43,14 @@ class ConnectionBasedSync extends Sync {
     this.runthrough(this.post, 'post', resource, data)
     .then(function(msg) {
       if (!this.should_process(msg)) {
-        console.log('Won\'t process', msg);
+        if (this.logging) {
+          console.log('Won\'t process', msg);
+        }
         return;
       }
-      console.log('Processing', msg);
+      if (this.logging) {
+        console.log('Processing', msg);
+      }
       resource.name = msg.name;
       resource.meta.__type = msg.type;
       this.resource_event(resource, msg.method, msg);
